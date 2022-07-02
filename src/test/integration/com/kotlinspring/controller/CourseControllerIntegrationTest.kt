@@ -1,9 +1,11 @@
 package com.kotlinspring.controller
 
 import com.kotlinspring.dto.CourseDTO
+import com.kotlinspring.entity.Course
 import com.kotlinspring.repository.CourseRepository
 import com.kotlinspring.util.courseEntityList
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,6 +28,7 @@ class CourseControllerIntegrationTest {
     fun setup(){
         courseRepository.deleteAll()
         val courses = courseEntityList()
+        courseRepository.saveAll(courses)
     }
 
     @Test
@@ -52,10 +55,49 @@ class CourseControllerIntegrationTest {
             .get()
             .uri("/v1/courses")
             .exchange()
-            .expectStatus().is2xxSuccessful
+            .expectStatus().isOk
+            .expectBodyList(CourseDTO::class.java)
+            .returnResult()
+            .responseBody
+        println("CourseDTOS : $courses")
+        assertEquals(3,courses!!.size)
+    }
+
+    @Test
+    fun updateCourse() {
+        val course =     Course(null,
+            "Build RestFul APis using SpringBoot and Kotlin", "Development")
+        courseRepository.save(course)
+
+       val updatedCourseDTO = CourseDTO(null,
+            "Build RestFul APis using SpringBoot and Kotlin1", "Development")
+       val updateCourse = webTestClient
+            .put()
+            .uri("v1/courses/{course_id}",course.id)
+            .bodyValue(updatedCourseDTO)
+            .exchange()
+            .expectStatus().isOk
             .expectBody(CourseDTO::class.java)
             .returnResult()
+            .responseBody
 
+        assertEquals("Build RestFul APis using SpringBoot and Kotlin1",updateCourse!!.name)
+
+    }
+
+    @Test
+    fun deleteCourse() {
+        val course =     Course(null,
+            "Build RestFul APis using SpringBoot and Kotlin", "Development")
+        courseRepository.save(course)
+
+        val updatedCourseDTO = CourseDTO(null,
+            "Build RestFul APis using SpringBoot and Kotlin1", "Development")
+        val updateCourse = webTestClient
+            .delete()
+            .uri("v1/courses/{course_id}",course.id)
+            .exchange()
+            .expectStatus().isNoContent
 
     }
 }
