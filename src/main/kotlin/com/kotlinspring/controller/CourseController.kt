@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
@@ -26,9 +27,9 @@ class CourseController(val courseService: CourseService) {
         return courseService.addCourse(courseDTO)
     }
 
-    @GetMapping
-    fun retrievAllCourses():List<CourseDTO>{
-        return courseService.retrieveAllCourses()
+    @GetMapping()
+    fun retrievAllCourses(@RequestParam("course_name", required = false) course_name: String?):List<CourseDTO>{
+        return courseService.retrieveAllCourses(course_name)
     }
 
     @PutMapping("/{course_id}")

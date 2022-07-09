@@ -3,8 +3,8 @@ package com.kotlinspring.controller
 import com.kotlinspring.dto.CourseDTO
 import com.kotlinspring.entity.Course
 import com.kotlinspring.service.CourseService
-import com.kotlinspring.util.courseDTO
 import com.ninjasquad.springmockk.MockkBean
+import courseDTO
 import io.mockk.every
 import io.mockk.just
 import io.mockk.runs
@@ -18,9 +18,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(controllers = [CourseController::class])
-@AutoConfigureWebTestClient
+@WebMvcTest(CourseController::class)
+@AutoConfigureWebTestClient(timeout = "6000000")
 class CourseControllerUnitTest {
+
     @Autowired
     lateinit var webTestClient: WebTestClient
 
@@ -33,7 +34,7 @@ class CourseControllerUnitTest {
         //given
         val courseDTO = courseDTO()
 
-        every { courseServiceMock.addCourse(any()) } returns courseDTO(id = 1)
+        every { courseServiceMock.addCourse(any()) } returns courseDTO(id=1)
 
         //when
         val savedCourseDTO = webTestClient
@@ -58,7 +59,7 @@ class CourseControllerUnitTest {
         //given
         val courseDTO = courseDTO(name = "", category = "")
 
-        every { courseServiceMock.addCourse(any()) } returns courseDTO(id = 1)
+        every { courseServiceMock.addCourse(any()) } returns courseDTO(id=1)
 
         //when
         val response = webTestClient
@@ -73,7 +74,8 @@ class CourseControllerUnitTest {
             .responseBody
 
         println("response : $response")
-
+        assertEquals("courseDTO.category must not be blank, courseDTO.name must not be blank"
+            , response)
     }
 
     @Test
@@ -99,19 +101,19 @@ class CourseControllerUnitTest {
             , response)
     }
 
+
+
     @Test
     fun retrieveAllCourses() {
 
-        every { courseServiceMock.retrieveAllCourses() }.returnsMany(
+        every { courseServiceMock.retrieveAllCourses(any()) }.returnsMany(
             listOf(
-                CourseDTO(
-                    1,
-                    "Build RestFul APis using Spring Boot and Kotlin", "Development"
-                ),
-                CourseDTO(
-                    2,
-                    "Build Reactive Microservices using Spring WebFlux/SpringBoot", "Development"
-                )
+                CourseDTO(1,
+                    "Build RestFul APis using Spring Boot and Kotlin", "Development" ,
+                    1),
+                CourseDTO(2,
+                    "Build Reactive Microservices using Spring WebFlux/SpringBoot", "Development" ,
+                    1)
             )
         )
 
@@ -134,15 +136,12 @@ class CourseControllerUnitTest {
     @Test
     fun updateCourse() {
 
-        val updatedCourseEntity = Course(
-            null,
-            "Apache Kafka for Developers using Spring Boot1", "Development"
-        )
+        val updatedCourseEntity = Course(null,
+            "Apache Kafka for Developers using Spring Boot1", "Development" )
 
-        every { courseServiceMock.updateCourse(any(), any()) } returns CourseDTO(
-            100,
-            "Apache Kafka for Developers using Spring Boot1", "Development"
-        )
+        every { courseServiceMock.updateCourse(any(), any()) } returns CourseDTO(100,
+            "Apache Kafka for Developers using Spring Boot1", "Development" ,
+            1)
 
 
         val updatedCourseDTO = webTestClient
@@ -174,6 +173,4 @@ class CourseControllerUnitTest {
 
     }
 
-
 }
-
